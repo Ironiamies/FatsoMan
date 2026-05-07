@@ -15,6 +15,7 @@
             --protein: #ef4444;
             --carbs: #10b981;
             --fats: #f59e0b;
+            --alcohol: #8b5cf6;
         }
 
         body {
@@ -46,7 +47,7 @@
 
         .input-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
             gap: 15px;
             margin-bottom: 15px;
         }
@@ -104,10 +105,24 @@
             font-size: 1.1rem;
         }
 
+        .science-box {
+            background: #fdf4ff;
+            border: 1px solid #f0abfc;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+            color: #86198f;
+            text-align: left;
+            display: none;
+        }
+
+        .science-box h3 { color: #86198f; margin-top: 0; font-size: 1.1rem; margin-bottom: 8px;}
+        .science-box p { margin: 0; font-size: 0.95rem; line-height: 1.4; color: #701a75;}
+
         .macro-bars {
             display: grid;
-            grid-template-columns: 1fr 1fr 1fr;
-            gap: 15px;
+            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+            gap: 10px;
             margin-top: 20px;
         }
 
@@ -123,19 +138,10 @@
         .p-color { color: var(--protein); }
         .c-color { color: var(--carbs); }
         .f-color { color: var(--fats); }
+        .a-color { color: var(--alcohol); }
 
-        .meal-plan {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-        }
-
-        .meal-card {
-            background: #f8fafc;
-            border: 1px solid #e2e8f0;
-            padding: 15px;
-            border-radius: 8px;
-        }
+        .meal-plan { display: flex; flex-direction: column; gap: 15px; }
+        .meal-card { background: #f8fafc; border: 1px solid #e2e8f0; padding: 15px; border-radius: 8px; }
         
         .meal-header {
             display: flex;
@@ -152,12 +158,7 @@
         .snack-card { border-color: var(--primary); background: #eff6ff; }
         .snack-card .meal-header { border-bottom-color: #bfdbfe; }
         
-        .food-suggestions {
-            font-size: 0.9rem;
-            color: var(--text-muted);
-            line-height: 1.5;
-        }
-
+        .food-suggestions { font-size: 0.9rem; color: var(--text-muted); line-height: 1.5; }
         .food-suggestions b { color: var(--text-main); }
 
         .warning {
@@ -195,10 +196,10 @@
             <div>
                 <label>Arkiaktiivisuus</label>
                 <select id="activity" onchange="calculate()">
-                    <option value="1.2">Istumatyö, ei liikuntaa (1.2)</option>
-                    <option value="1.375" selected>Kevyt aktiivisuus / seisomatyö (1.375)</option>
-                    <option value="1.55">Kohtalainen aktiivisuus (1.55)</option>
-                    <option value="1.725">Raskas fyysinen työ (1.725)</option>
+                    <option value="1.2">Istumatyö, ei liikuntaa</option>
+                    <option value="1.375" selected>Kevyt aktiivisuus / seisomatyö</option>
+                    <option value="1.55">Kohtalainen aktiivisuus</option>
+                    <option value="1.725">Raskas fyysinen työ</option>
                 </select>
             </div>
             <div>
@@ -216,6 +217,14 @@
                 <input type="number" id="target-loss" value="10" oninput="calculate()">
             </div>
         </div>
+        
+        <div class="input-grid" style="grid-template-columns: 1fr; margin-top: 10px; border-top: 1px solid #e2e8f0; padding-top: 15px;">
+            <div>
+                <label style="color: #8b5cf6;">🍷 Oletko ottamassa alkoholia tänään? (Annoksia)</label>
+                <input type="number" id="alcohol-doses" value="0" min="0" oninput="calculate()" placeholder="1 annos = 33cl olut tai 12cl viini">
+                <span style="font-size: 0.8rem; color: #64748b;">1 ravintola-annos = 12g puhdasta alkoholia (n. 100 kcal)</span>
+            </div>
+        </div>
     </div>
 
     <div class="card result-main">
@@ -227,9 +236,14 @@
             ⏳ Aika-arvio tavoitteeseen: <span id="timeframe-val">-</span>
         </div>
 
+        <div id="science-box" class="science-box">
+            <h3>🛑 Rasvanpoltto pysähdyksissä: <span id="fat-block-time">0</span> tuntia!</h3>
+            <p><b>Tieteellinen fakta:</b> Keho ei voi varastoida alkoholia. Maksan on pakko priorisoida etanolin polttaminen yli kaiken muun. Rasvan hapettuminen (poltto) pysähtyy käytännössä täysin siksi aikaa, kun elimistö polttaa antamaasi <span id="alc-grams">0</span> grammaa alkoholia. Lisäksi alkoholin kalorit on vähennetty hiilihydraateistasi, jotta et liho.</p>
+        </div>
+
         <div class="macro-bars">
             <div class="macro-box">
-                <div style="font-size:0.8rem; color:#64748b;">Proteiini (2g/kg)</div>
+                <div style="font-size:0.8rem; color:#64748b;">Proteiini</div>
                 <div class="m-val p-color"><span id="mac-p">0</span> g</div>
             </div>
             <div class="macro-box">
@@ -237,18 +251,22 @@
                 <div class="m-val c-color"><span id="mac-c">0</span> g</div>
             </div>
             <div class="macro-box">
-                <div style="font-size:0.8rem; color:#64748b;">Rasva (1g/kg)</div>
+                <div style="font-size:0.8rem; color:#64748b;">Rasva</div>
                 <div class="m-val f-color"><span id="mac-f">0</span> g</div>
             </div>
+            <div class="macro-box" id="alc-macro-box" style="display:none; border-color: #c084fc; background: #faf5ff;">
+                <div style="font-size:0.8rem; color:#8b5cf6;">Alkoholi</div>
+                <div class="m-val a-color"><span id="mac-a">0</span> g</div>
+            </div>
         </div>
-        <div id="carb-warning" class="warning">⚠️ Huom! Kaloritavoite on niin alhainen, että hiilihydraatit menevät miinukselle. Nosta kaloreita tai pudota hieman rasvaa.</div>
+        <div id="carb-warning" class="warning">⚠️ Huom! Kaloritavoite on niin alhainen (tai joit niin paljon), että hiilihydraatit menivät nollaan. Nosta kaloreita tai pudota rasvaa.</div>
     </div>
 
     <div class="card">
         <h2>🍽️ Ruokavaliomalli</h2>
         <div class="input-grid" style="grid-template-columns: 1fr 1fr;">
             <div>
-                <label>Aterioiden määrä (pl. treenilaturi)</label>
+                <label>Aterioiden määrä</label>
                 <select id="meals" onchange="calculate()">
                     <option value="3">3 ateriaa päivässä</option>
                     <option value="4" selected>4 ateriaa päivässä</option>
@@ -257,7 +275,7 @@
             </div>
             <div class="toggle-row">
                 <input type="checkbox" id="training-day" onchange="calculate()" checked>
-                <label style="margin:0; color:#1e293b; cursor:pointer;" for="training-day">💪 Treenipäivä (Lisää treenilaturin/palkkarin)</label>
+                <label style="margin:0; color:#1e293b; cursor:pointer;" for="training-day">💪 Treenipäivä</label>
             </div>
         </div>
 
@@ -278,44 +296,56 @@
         const targetLoss = parseFloat(document.getElementById('target-loss').value) || 0;
         const mealCount = parseInt(document.getElementById('meals').value);
         const isTrainingDay = document.getElementById('training-day').checked;
+        const alcoholDoses = parseFloat(document.getElementById('alcohol-doses').value) || 0;
 
         if (!weight || !height || !age) return;
 
-        // 1. Harris-Benedict BMR
-        let bmr = 0;
-        if (gender === 'male') {
-            bmr = 66.5 + (13.75 * weight) + (5.003 * height) - (6.75 * age);
-        } else {
-            bmr = 655.1 + (9.563 * weight) + (1.850 * height) - (4.676 * age);
-        }
-
-        // 2. Kokonaiskulutus (TDEE) ja tavoitekalorit
+        // 1. Harris-Benedict BMR & TDEE
+        let bmr = gender === 'male' 
+            ? 66.5 + (13.75 * weight) + (5.003 * height) - (6.75 * age) 
+            : 655.1 + (9.563 * weight) + (1.850 * height) - (4.676 * age);
+        
         const tdee = bmr * activity;
         const targetCals = tdee + goalDeficit;
 
-        // 3. Aika-arvion laskenta (1 kg rasvaa = ~7700 kcal)
+        // 2. Aika-arvio
         const timeframeEl = document.getElementById('timeframe-val');
         if (goalDeficit < 0 && targetLoss > 0) {
-            const totalDeficitNeeded = targetLoss * 7700;
-            const daysNeeded = totalDeficitNeeded / Math.abs(goalDeficit);
-            const weeksNeeded = Math.round(daysNeeded / 7);
-            const monthsNeeded = (weeksNeeded / 4.33).toFixed(1);
-            timeframeEl.innerText = `${weeksNeeded} viikkoa (n. ${monthsNeeded} kk)`;
-            document.getElementById('timeframe-box').style.display = 'block';
-        } else if (goalDeficit === 0 && targetLoss > 0) {
-            timeframeEl.innerText = "Ylläpitokaloreilla paino ei putoa!";
+            const weeksNeeded = Math.round((targetLoss * 7700) / Math.abs(goalDeficit) / 7);
+            timeframeEl.innerText = `${weeksNeeded} viikkoa (n. ${(weeksNeeded / 4.33).toFixed(1)} kk)`;
             document.getElementById('timeframe-box').style.display = 'block';
         } else {
             document.getElementById('timeframe-box').style.display = 'none';
         }
 
-        // 4. Makrojen jako (Proteiini 2g/kg, Rasva 1g/kg, Hiilarit loput)
+        // 3. Alkoholin tieteellinen vaikutus
+        const ethanolGrams = alcoholDoses * 12; // 1 annos = 12g etanoli
+        // Maksan käsittelykapasiteetti on karkeasti 0.1g per painokilo tunnissa.
+        const eliminationRatePerHour = weight * 0.1; 
+        const fatBurnPauseHours = ethanolGrams > 0 ? (ethanolGrams / eliminationRatePerHour).toFixed(1) : 0;
+        
+        // 1 annos viiniä/olutta on keskimäärin n. 100 kcal (84 kcal etanoli + 16 kcal hiilihydraatit juomasta)
+        const alcoholKcal = alcoholDoses * 100; 
+
+        if (alcoholDoses > 0) {
+            document.getElementById('science-box').style.display = 'block';
+            document.getElementById('fat-block-time').innerText = fatBurnPauseHours;
+            document.getElementById('alc-grams').innerText = ethanolGrams;
+            document.getElementById('alc-macro-box').style.display = 'block';
+            document.getElementById('mac-a').innerText = ethanolGrams;
+        } else {
+            document.getElementById('science-box').style.display = 'none';
+            document.getElementById('alc-macro-box').style.display = 'none';
+        }
+
+        // 4. Makrojen jako (Proteiini 2g/kg, Rasva 1g/kg, Hiilarit loput - alkoholi)
         const protein = weight * 2;
         const fat = weight * 1;
         const proteinCals = protein * 4;
         const fatCals = fat * 9;
-        let carbCals = targetCals - proteinCals - fatCals;
         
+        // Hiilihydraatit joutuvat joustamaan alkoholin kaloreiden edestä
+        let carbCals = targetCals - proteinCals - fatCals - alcoholKcal;
         let carbs = carbCals / 4;
         
         const warnEl = document.getElementById('carb-warning');
@@ -326,7 +356,7 @@
             warnEl.style.display = "none";
         }
 
-        // Päivitä yläosan UI
+        // Päivitä UI
         document.getElementById('bmr-val').innerText = Math.round(bmr);
         document.getElementById('tdee-val').innerText = Math.round(tdee);
         document.getElementById('target-cals').innerText = Math.round(targetCals);
@@ -342,71 +372,50 @@
         let remainingC = carbs;
         let remainingF = fat;
 
-        // Treenivälipala eristetään, jos valittu
         if (isTrainingDay) {
             const snackP = Math.min(30, remainingP * 0.25);
             const snackC = Math.min(40, remainingC * 0.30);
-            const snackF = 0; 
-
+            
             remainingP -= snackP;
             remainingC -= snackC;
-            
-            const snackKcal = Math.round((snackP*4) + (snackC*4));
             
             planContainer.innerHTML += `
                 <div class="meal-card snack-card">
                     <div class="meal-header">
-                        <div class="meal-title">⚡ Treenilaturi / Palkkari <span style="font-size:0.9rem; font-weight:normal; color:#64748b;">(~${snackKcal} kcal)</span></div>
-                        <div class="meal-macros">
-                            <span class="p-color">${Math.round(snackP)}g P</span> | <span class="c-color">${Math.round(snackC)}g H</span> | <span class="f-color">0g R</span>
-                        </div>
+                        <div class="meal-title">⚡ Treenilaturi / Palkkari <span style="font-size:0.9rem; font-weight:normal; color:#64748b;">(~${Math.round((snackP*4)+(snackC*4))} kcal)</span></div>
+                        <div class="meal-macros"><span class="p-color">${Math.round(snackP)}g P</span> | <span class="c-color">${Math.round(snackC)}g H</span> | <span class="f-color">0g R</span></div>
                     </div>
-                    <div class="food-suggestions">
-                        💡 <b>Nopeaa imeytymistä:</b> Hera-annos (n. 1 dl) ja 1 banaani tai puoli kourallista maltodekstriiniä. Vältä rasvaa tässä kohtaa.
-                    </div>
+                    <div class="food-suggestions">💡 <b>Nopeaa imeytymistä:</b> Hera-annos (n. 1 dl) ja 1 banaani tai puoli kourallista maltodekstriiniä.</div>
                 </div>
             `;
         }
 
-        // Jaetaan loput pääaterioille tasan
         const mealP = remainingP / mealCount;
         const mealC = remainingC / mealCount;
         const mealF = remainingF / mealCount;
         const mealKcal = Math.round((mealP*4) + (mealC*4) + (mealF*9));
 
-        // Aterioiden nimeäminen fiksusti
-        const mealNames3 = ["🍳 Aamiainen", "🥗 Lounas", "🥩 Päivällinen"];
-        const mealNames4 = ["🍳 Aamiainen", "🥗 Lounas", "🥩 Päivällinen", "🥣 Iltapala"];
-        const mealNames5 = ["🍳 Aamiainen", "🥗 Lounas", "🥪 Välipala", "🥩 Päivällinen", "🥣 Iltapala"];
-        
-        let mealNames = mealCount === 3 ? mealNames3 : (mealCount === 5 ? mealNames5 : mealNames4);
+        const mealNames = mealCount === 3 ? ["🍳 Aamiainen", "🥗 Lounas", "🥩 Päivällinen"] 
+                        : mealCount === 5 ? ["🍳 Aamiainen", "🥗 Lounas", "🥪 Välipala", "🥩 Päivällinen", "🥣 Iltapala"] 
+                        : ["🍳 Aamiainen", "🥗 Lounas", "🥩 Päivällinen", "🥣 Iltapala"];
 
         for (let i = 0; i < mealCount; i++) {
-            
-            // Karkeat ruoka-arviot ohjenuoraksi (Hieman yksinkertaistettu laskenta raa'oista raaka-aineista)
-            let meatEstimate = Math.round(mealP * 4.5); // N. 22g prodea per 100g kanaa/nautaa
-            let carbEstimate = Math.round(mealC * 1.5); // N. 65-70g hiilaria per 100g raakaa riisiä/pastaa/kauraa
-            let fatEstimate = Math.round(mealF); // 10g rasvaa on aika lailla 10g öljyä/voita
+            let meatEstimate = Math.round(mealP * 4.5);
+            let carbEstimate = Math.round(mealC * 1.5);
+            let fatEstimate = Math.round(mealF);
 
             planContainer.innerHTML += `
                 <div class="meal-card">
                     <div class="meal-header">
                         <div class="meal-title">${mealNames[i]} <span style="font-size:0.9rem; font-weight:normal; color:#64748b;">(~${mealKcal} kcal)</span></div>
-                        <div class="meal-macros">
-                            <span class="p-color">${Math.round(mealP)}g P</span> | 
-                            <span class="c-color">${Math.round(mealC)}g H</span> | 
-                            <span class="f-color">${Math.round(mealF)}g R</span>
-                        </div>
+                        <div class="meal-macros"><span class="p-color">${Math.round(mealP)}g P</span> | <span class="c-color">${Math.round(mealC)}g H</span> | <span class="f-color">${Math.round(mealF)}g R</span></div>
                     </div>
-                    <div class="food-suggestions">
-                        💡 <b>Mistä nämä saa?</b> Esimerkiksi n. ${meatEstimate}g broilerin rintafileetä / vähärasvaista nautaa / raejuustoa, ${carbEstimate}g (kuivapainona) riisiä / kauraa / pastaa ja ${fatEstimate}g oliiviöljyä / voita / pähkinöitä.
-                    </div>
+                    <div class="food-suggestions">💡 <b>Mistä nämä saa?</b> N. ${meatEstimate}g kanaa/nautaa/raejuustoa, ${carbEstimate}g (kuivana) riisiä/pastaa/kauraa ja ${fatEstimate}g öljyä/pähkinöitä.</div>
                 </div>
             `;
         }
     }
 
-    // Suorita laskenta kerran sivun latautuessa
     window.onload = calculate;
 </script>
 
