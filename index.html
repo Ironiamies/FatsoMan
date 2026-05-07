@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="fi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MacroMaster - Älykäs Dieettikone</title>
+    <style>
+        :root {
+            --bg-color: #f4f5f7;
+            --card-bg: #ffffff;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --accent: #2c3e50;
+            --primary: #3b82f6;
+            --protein: #ef4444;
+            --carbs: #10b981;
+            --fats: #f59e0b;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            margin: 0;
+            padding: 15px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .container {
+            max-width: 800px;
+            width: 100%;
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 20px;
+        }
+
+        h1, h2, h3 { color: var(--accent); margin-top: 0; }
+        
+        .card {
+            background: var(--card-bg);
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+        }
+
+        .input-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            margin-bottom: 5px;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            font-size: 1rem;
+            box-sizing: border-box;
+            background: #f8fafc;
+        }
+
+        .toggle-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 10px;
+            padding: 10px;
+            background: #eff6ff;
+            border-radius: 8px;
+            border: 1px solid #bfdbfe;
+        }
+
+        input[type="checkbox"] { width: 20px; height: 20px; }
+
+        .result-main {
+            text-align: center;
+            padding: 20px;
+            background: var(--accent);
+            color: white;
+            border-radius: 12px;
+            margin-bottom: 20px;
+        }
+
+        .result-main h1 { color: white; font-size: 2.5rem; margin: 10px 0; }
+        .result-main p { margin: 0; opacity: 0.9; }
+
+        .macro-bars {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .macro-box {
+            background: #f8fafc;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            border: 1px solid #e2e8f0;
+        }
+
+        .m-val { font-size: 1.5rem; font-weight: bold; }
+        .p-color { color: var(--protein); }
+        .c-color { color: var(--carbs); }
+        .f-color { color: var(--fats); }
+
+        .meal-plan {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .meal-card {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            padding: 15px;
+            border-radius: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .meal-title { font-weight: bold; font-size: 1.1rem; color: var(--accent); }
+        .meal-macros { display: flex; gap: 15px; font-weight: 600; }
+        .snack-card { border-color: var(--primary); background: #eff6ff; }
+        
+        .warning {
+            background: #fef2f2;
+            color: #ef4444;
+            padding: 10px;
+            border-radius: 8px;
+            margin-top: 10px;
+            font-size: 0.9rem;
+            display: none;
+        }
+
+    </style>
+</head>
+<body>
+
+<div class="container">
+    
+    <div class="card">
+        <h2>📊 Perustiedot</h2>
+        <div class="input-grid">
+            <div>
+                <label>Sukupuoli</label>
+                <select id="gender" onchange="calculate()">
+                    <option value="male">Mies</option>
+                    <option value="female">Nainen</option>
+                </select>
+            </div>
+            <div><label>Ikä (v)</label><input type="number" id="age" value="35" oninput="calculate()"></div>
+            <div><label>Paino (kg)</label><input type="number" id="weight" value="85" oninput="calculate()"></div>
+            <div><label>Pituus (cm)</label><input type="number" id="height" value="180" oninput="calculate()"></div>
+        </div>
+
+        <div class="input-grid">
+            <div>
+                <label>Arkiaktiivisuus</label>
+                <select id="activity" onchange="calculate()">
+                    <option value="1.2">Istumatyö, ei liikuntaa (1.2)</option>
+                    <option value="1.375" selected>Kevyt aktiivisuus / seisomatyö (1.375)</option>
+                    <option value="1.55">Kohtalainen aktiivisuus (1.55)</option>
+                    <option value="1.725">Raskas fyysinen työ (1.725)</option>
+                </select>
+            </div>
+            <div>
+                <label>Tavoite</label>
+                <select id="goal" onchange="calculate()">
+                    <option value="0">Ylläpito (±0 kcal)</option>
+                    <option value="-250">Kevyt kiristys (-0.25 kg/vko)</option>
+                    <option value="-500" selected>Normaali dieetti (-0.5 kg/vko)</option>
+                    <option value="-750">Nopea dieetti (-0.75 kg/vko)</option>
+                    <option value="-1000">Agresiivinen dieetti (-1.0 kg/vko)</option>
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <div class="card result-main">
+        <p>Päivittäinen kaloritavoitteesi</p>
+        <h1><span id="target-cals">0</span> kcal</h1>
+        <p>Perusaineenvaihdunta (BMR): <span id="bmr-val">0</span> kcal | Kulutus: <span id="tdee-val">0</span> kcal</p>
+        
+        <div class="macro-bars">
+            <div class="macro-box">
+                <div style="font-size:0.8rem; color:#64748b;">Proteiini (2g/kg)</div>
+                <div class="m-val p-color"><span id="mac-p">0</span> g</div>
+            </div>
+            <div class="macro-box">
+                <div style="font-size:0.8rem; color:#64748b;">Hiilihydraatit (Loput)</div>
+                <div class="m-val c-color"><span id="mac-c">0</span> g</div>
+            </div>
+            <div class="macro-box">
+                <div style="font-size:0.8rem; color:#64748b;">Rasva (1g/kg)</div>
+                <div class="m-val f-color"><span id="mac-f">0</span> g</div>
+            </div>
+        </div>
+        <div id="carb-warning" class="warning">⚠️ Huom! Kaloritavoite on niin alhainen, että hiilihydraatit menevät miinukselle. Nosta kaloreita tai pudota hieman rasvaa.</div>
+    </div>
+
+    <div class="card">
+        <h2>🍽️ Ruokavaliomalli</h2>
+        <div class="input-grid" style="grid-template-columns: 1fr 1fr;">
+            <div>
+                <label>Pääaterioiden määrä</label>
+                <select id="meals" onchange="calculate()">
+                    <option value="3">3 ateriaa päivässä</option>
+                    <option value="4" selected>4 ateriaa päivässä</option>
+                    <option value="5">5 ateriaa päivässä</option>
+                </select>
+            </div>
+            <div class="toggle-row">
+                <input type="checkbox" id="training-day" onchange="calculate()" checked>
+                <label style="margin:0; color:#1e293b; cursor:pointer;" for="training-day">💪 Treenipäivä (Lisää treenilaturin/palkkarin)</label>
+            </div>
+        </div>
+
+        <div id="meal-plan-container" class="meal-plan">
+            </div>
+    </div>
+
+</div>
+
+<script>
+    function calculate() {
+        // Hae arvot
+        const gender = document.getElementById('gender').value;
+        const weight = parseFloat(document.getElementById('weight').value) || 0;
+        const height = parseFloat(document.getElementById('height').value) || 0;
+        const age = parseFloat(document.getElementById('age').value) || 0;
+        const activity = parseFloat(document.getElementById('activity').value);
+        const goalDeficit = parseFloat(document.getElementById('goal').value);
+        const mealCount = parseInt(document.getElementById('meals').value);
+        const isTrainingDay = document.getElementById('training-day').checked;
+
+        if (!weight || !height || !age) return;
+
+        // 1. Harris-Benedict BMR
+        let bmr = 0;
+        if (gender === 'male') {
+            bmr = 66.5 + (13.75 * weight) + (5.003 * height) - (6.75 * age);
+        } else {
+            bmr = 655.1 + (9.563 * weight) + (1.850 * height) - (4.676 * age);
+        }
+
+        // 2. Kokonaiskulutus (TDEE) ja tavoitekalorit
+        const tdee = bmr * activity;
+        const targetCals = tdee + goalDeficit;
+
+        // 3. Makrojen jako (Proteiini 2g/kg, Rasva 1g/kg, Hiilarit loput)
+        const protein = weight * 2;
+        const fat = weight * 1;
+        
+        const proteinCals = protein * 4;
+        const fatCals = fat * 9;
+        let carbCals = targetCals - proteinCals - fatCals;
+        
+        let carbs = carbCals / 4;
+        
+        const warnEl = document.getElementById('carb-warning');
+        if (carbs < 0) {
+            carbs = 0;
+            warnEl.style.display = "block";
+        } else {
+            warnEl.style.display = "none";
+        }
+
+        // Päivitä UI
+        document.getElementById('bmr-val').innerText = Math.round(bmr);
+        document.getElementById('tdee-val').innerText = Math.round(tdee);
+        document.getElementById('target-cals').innerText = Math.round(targetCals);
+        
+        document.getElementById('mac-p').innerText = Math.round(protein);
+        document.getElementById('mac-f').innerText = Math.round(fat);
+        document.getElementById('mac-c').innerText = Math.round(carbs);
+
+        // 4. Ateriasuunnitelman luonti
+        const planContainer = document.getElementById('meal-plan-container');
+        planContainer.innerHTML = "";
+
+        let remainingP = protein;
+        let remainingC = carbs;
+        let remainingF = fat;
+
+        // Treenivälipala eristetään, jos valittu
+        if (isTrainingDay) {
+            // Tyypillinen treenilaturi/palkkari (esim. hera + banaani)
+            const snackP = Math.min(30, remainingP * 0.25); // max 30g
+            const snackC = Math.min(40, remainingC * 0.30); // max 40g
+            const snackF = 0; // Treenin ympärillä rasva minimiin imeytymisen nopeuttamiseksi
+
+            remainingP -= snackP;
+            remainingC -= snackC;
+            
+            const snackKcal = Math.round((snackP*4) + (snackC*4));
+            
+            planContainer.innerHTML += `
+                <div class="meal-card snack-card">
+                    <div class="meal-title">⚡ Treenin ympärillä (Laturi/Palkkari) <span style="font-size:0.8rem; font-weight:normal; color:#64748b;">(~${snackKcal} kcal)</span></div>
+                    <div class="meal-macros">
+                        <span class="p-color">${Math.round(snackP)}g P</span> | 
+                        <span class="c-color">${Math.round(snackC)}g H</span> | 
+                        <span class="f-color">${Math.round(snackF)}g R</span>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Jaetaan loput pääaterioille tasan
+        const mealP = remainingP / mealCount;
+        const mealC = remainingC / mealCount;
+        const mealF = remainingF / mealCount;
+        const mealKcal = Math.round((mealP*4) + (mealC*4) + (mealF*9));
+
+        for (let i = 1; i <= mealCount; i++) {
+            planContainer.innerHTML += `
+                <div class="meal-card">
+                    <div class="meal-title">Ateria ${i} <span style="font-size:0.8rem; font-weight:normal; color:#64748b;">(~${mealKcal} kcal)</span></div>
+                    <div class="meal-macros">
+                        <span class="p-color">${Math.round(mealP)}g P</span> | 
+                        <span class="c-color">${Math.round(mealC)}g H</span> | 
+                        <span class="f-color">${Math.round(mealF)}g R</span>
+                    </div>
+                </div>
+            `;
+        }
+    }
+
+    // Suorita laskenta kerran sivun latautuessa
+    window.onload = calculate;
+</script>
+
+</body>
+</html>
