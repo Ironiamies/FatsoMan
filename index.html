@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MacroMaster - Älykäs Dieettikone</title>
+    <title>FatsoMan - Älykäs Dieettikone</title>
     <style>
         :root {
             --bg-color: #f4f5f7;
@@ -94,6 +94,16 @@
         .result-main h1 { color: white; font-size: 2.5rem; margin: 10px 0; }
         .result-main p { margin: 0; opacity: 0.9; }
 
+        .timeframe-box {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+
         .macro-bars {
             display: grid;
             grid-template-columns: 1fr 1fr 1fr;
@@ -117,7 +127,7 @@
         .meal-plan {
             display: flex;
             flex-direction: column;
-            gap: 10px;
+            gap: 15px;
         }
 
         .meal-card {
@@ -125,16 +135,31 @@
             border: 1px solid #e2e8f0;
             padding: 15px;
             border-radius: 8px;
+        }
+        
+        .meal-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
             flex-wrap: wrap;
+            border-bottom: 2px solid #e2e8f0;
+            padding-bottom: 10px;
+            margin-bottom: 10px;
         }
 
-        .meal-title { font-weight: bold; font-size: 1.1rem; color: var(--accent); }
-        .meal-macros { display: flex; gap: 15px; font-weight: 600; }
+        .meal-title { font-weight: bold; font-size: 1.2rem; color: var(--accent); }
+        .meal-macros { font-weight: bold; font-size: 1.1rem; }
         .snack-card { border-color: var(--primary); background: #eff6ff; }
+        .snack-card .meal-header { border-bottom-color: #bfdbfe; }
         
+        .food-suggestions {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            line-height: 1.5;
+        }
+
+        .food-suggestions b { color: var(--text-main); }
+
         .warning {
             background: #fef2f2;
             color: #ef4444;
@@ -152,7 +177,7 @@
 <div class="container">
     
     <div class="card">
-        <h2>📊 Perustiedot</h2>
+        <h2>📊 Perustiedot & Tavoite</h2>
         <div class="input-grid">
             <div>
                 <label>Sukupuoli</label>
@@ -162,7 +187,7 @@
                 </select>
             </div>
             <div><label>Ikä (v)</label><input type="number" id="age" value="35" oninput="calculate()"></div>
-            <div><label>Paino (kg)</label><input type="number" id="weight" value="85" oninput="calculate()"></div>
+            <div><label>Paino (kg)</label><input type="number" id="weight" value="95" oninput="calculate()"></div>
             <div><label>Pituus (cm)</label><input type="number" id="height" value="180" oninput="calculate()"></div>
         </div>
 
@@ -177,14 +202,18 @@
                 </select>
             </div>
             <div>
-                <label>Tavoite</label>
+                <label>Vauhti</label>
                 <select id="goal" onchange="calculate()">
                     <option value="0">Ylläpito (±0 kcal)</option>
                     <option value="-250">Kevyt kiristys (-0.25 kg/vko)</option>
                     <option value="-500" selected>Normaali dieetti (-0.5 kg/vko)</option>
                     <option value="-750">Nopea dieetti (-0.75 kg/vko)</option>
-                    <option value="-1000">Agresiivinen dieetti (-1.0 kg/vko)</option>
+                    <option value="-1000">Aggressiivinen dieetti (-1.0 kg/vko)</option>
                 </select>
+            </div>
+            <div>
+                <label>Pudotustarve (kg)</label>
+                <input type="number" id="target-loss" value="10" oninput="calculate()">
             </div>
         </div>
     </div>
@@ -194,13 +223,17 @@
         <h1><span id="target-cals">0</span> kcal</h1>
         <p>Perusaineenvaihdunta (BMR): <span id="bmr-val">0</span> kcal | Kulutus: <span id="tdee-val">0</span> kcal</p>
         
+        <div id="timeframe-box" class="timeframe-box">
+            ⏳ Aika-arvio tavoitteeseen: <span id="timeframe-val">-</span>
+        </div>
+
         <div class="macro-bars">
             <div class="macro-box">
                 <div style="font-size:0.8rem; color:#64748b;">Proteiini (2g/kg)</div>
                 <div class="m-val p-color"><span id="mac-p">0</span> g</div>
             </div>
             <div class="macro-box">
-                <div style="font-size:0.8rem; color:#64748b;">Hiilihydraatit (Loput)</div>
+                <div style="font-size:0.8rem; color:#64748b;">Hiilihydraatit</div>
                 <div class="m-val c-color"><span id="mac-c">0</span> g</div>
             </div>
             <div class="macro-box">
@@ -215,7 +248,7 @@
         <h2>🍽️ Ruokavaliomalli</h2>
         <div class="input-grid" style="grid-template-columns: 1fr 1fr;">
             <div>
-                <label>Pääaterioiden määrä</label>
+                <label>Aterioiden määrä (pl. treenilaturi)</label>
                 <select id="meals" onchange="calculate()">
                     <option value="3">3 ateriaa päivässä</option>
                     <option value="4" selected>4 ateriaa päivässä</option>
@@ -236,13 +269,13 @@
 
 <script>
     function calculate() {
-        // Hae arvot
         const gender = document.getElementById('gender').value;
         const weight = parseFloat(document.getElementById('weight').value) || 0;
         const height = parseFloat(document.getElementById('height').value) || 0;
         const age = parseFloat(document.getElementById('age').value) || 0;
         const activity = parseFloat(document.getElementById('activity').value);
         const goalDeficit = parseFloat(document.getElementById('goal').value);
+        const targetLoss = parseFloat(document.getElementById('target-loss').value) || 0;
         const mealCount = parseInt(document.getElementById('meals').value);
         const isTrainingDay = document.getElementById('training-day').checked;
 
@@ -260,10 +293,25 @@
         const tdee = bmr * activity;
         const targetCals = tdee + goalDeficit;
 
-        // 3. Makrojen jako (Proteiini 2g/kg, Rasva 1g/kg, Hiilarit loput)
+        // 3. Aika-arvion laskenta (1 kg rasvaa = ~7700 kcal)
+        const timeframeEl = document.getElementById('timeframe-val');
+        if (goalDeficit < 0 && targetLoss > 0) {
+            const totalDeficitNeeded = targetLoss * 7700;
+            const daysNeeded = totalDeficitNeeded / Math.abs(goalDeficit);
+            const weeksNeeded = Math.round(daysNeeded / 7);
+            const monthsNeeded = (weeksNeeded / 4.33).toFixed(1);
+            timeframeEl.innerText = `${weeksNeeded} viikkoa (n. ${monthsNeeded} kk)`;
+            document.getElementById('timeframe-box').style.display = 'block';
+        } else if (goalDeficit === 0 && targetLoss > 0) {
+            timeframeEl.innerText = "Ylläpitokaloreilla paino ei putoa!";
+            document.getElementById('timeframe-box').style.display = 'block';
+        } else {
+            document.getElementById('timeframe-box').style.display = 'none';
+        }
+
+        // 4. Makrojen jako (Proteiini 2g/kg, Rasva 1g/kg, Hiilarit loput)
         const protein = weight * 2;
         const fat = weight * 1;
-        
         const proteinCals = protein * 4;
         const fatCals = fat * 9;
         let carbCals = targetCals - proteinCals - fatCals;
@@ -278,16 +326,15 @@
             warnEl.style.display = "none";
         }
 
-        // Päivitä UI
+        // Päivitä yläosan UI
         document.getElementById('bmr-val').innerText = Math.round(bmr);
         document.getElementById('tdee-val').innerText = Math.round(tdee);
         document.getElementById('target-cals').innerText = Math.round(targetCals);
-        
         document.getElementById('mac-p').innerText = Math.round(protein);
         document.getElementById('mac-f').innerText = Math.round(fat);
         document.getElementById('mac-c').innerText = Math.round(carbs);
 
-        // 4. Ateriasuunnitelman luonti
+        // 5. Ateriasuunnitelman luonti
         const planContainer = document.getElementById('meal-plan-container');
         planContainer.innerHTML = "";
 
@@ -297,10 +344,9 @@
 
         // Treenivälipala eristetään, jos valittu
         if (isTrainingDay) {
-            // Tyypillinen treenilaturi/palkkari (esim. hera + banaani)
-            const snackP = Math.min(30, remainingP * 0.25); // max 30g
-            const snackC = Math.min(40, remainingC * 0.30); // max 40g
-            const snackF = 0; // Treenin ympärillä rasva minimiin imeytymisen nopeuttamiseksi
+            const snackP = Math.min(30, remainingP * 0.25);
+            const snackC = Math.min(40, remainingC * 0.30);
+            const snackF = 0; 
 
             remainingP -= snackP;
             remainingC -= snackC;
@@ -309,11 +355,14 @@
             
             planContainer.innerHTML += `
                 <div class="meal-card snack-card">
-                    <div class="meal-title">⚡ Treenin ympärillä (Laturi/Palkkari) <span style="font-size:0.8rem; font-weight:normal; color:#64748b;">(~${snackKcal} kcal)</span></div>
-                    <div class="meal-macros">
-                        <span class="p-color">${Math.round(snackP)}g P</span> | 
-                        <span class="c-color">${Math.round(snackC)}g H</span> | 
-                        <span class="f-color">${Math.round(snackF)}g R</span>
+                    <div class="meal-header">
+                        <div class="meal-title">⚡ Treenilaturi / Palkkari <span style="font-size:0.9rem; font-weight:normal; color:#64748b;">(~${snackKcal} kcal)</span></div>
+                        <div class="meal-macros">
+                            <span class="p-color">${Math.round(snackP)}g P</span> | <span class="c-color">${Math.round(snackC)}g H</span> | <span class="f-color">0g R</span>
+                        </div>
+                    </div>
+                    <div class="food-suggestions">
+                        💡 <b>Nopeaa imeytymistä:</b> Hera-annos (n. 1 dl) ja 1 banaani tai puoli kourallista maltodekstriiniä. Vältä rasvaa tässä kohtaa.
                     </div>
                 </div>
             `;
@@ -325,14 +374,32 @@
         const mealF = remainingF / mealCount;
         const mealKcal = Math.round((mealP*4) + (mealC*4) + (mealF*9));
 
-        for (let i = 1; i <= mealCount; i++) {
+        // Aterioiden nimeäminen fiksusti
+        const mealNames3 = ["🍳 Aamiainen", "🥗 Lounas", "🥩 Päivällinen"];
+        const mealNames4 = ["🍳 Aamiainen", "🥗 Lounas", "🥩 Päivällinen", "🥣 Iltapala"];
+        const mealNames5 = ["🍳 Aamiainen", "🥗 Lounas", "🥪 Välipala", "🥩 Päivällinen", "🥣 Iltapala"];
+        
+        let mealNames = mealCount === 3 ? mealNames3 : (mealCount === 5 ? mealNames5 : mealNames4);
+
+        for (let i = 0; i < mealCount; i++) {
+            
+            // Karkeat ruoka-arviot ohjenuoraksi (Hieman yksinkertaistettu laskenta raa'oista raaka-aineista)
+            let meatEstimate = Math.round(mealP * 4.5); // N. 22g prodea per 100g kanaa/nautaa
+            let carbEstimate = Math.round(mealC * 1.5); // N. 65-70g hiilaria per 100g raakaa riisiä/pastaa/kauraa
+            let fatEstimate = Math.round(mealF); // 10g rasvaa on aika lailla 10g öljyä/voita
+
             planContainer.innerHTML += `
                 <div class="meal-card">
-                    <div class="meal-title">Ateria ${i} <span style="font-size:0.8rem; font-weight:normal; color:#64748b;">(~${mealKcal} kcal)</span></div>
-                    <div class="meal-macros">
-                        <span class="p-color">${Math.round(mealP)}g P</span> | 
-                        <span class="c-color">${Math.round(mealC)}g H</span> | 
-                        <span class="f-color">${Math.round(mealF)}g R</span>
+                    <div class="meal-header">
+                        <div class="meal-title">${mealNames[i]} <span style="font-size:0.9rem; font-weight:normal; color:#64748b;">(~${mealKcal} kcal)</span></div>
+                        <div class="meal-macros">
+                            <span class="p-color">${Math.round(mealP)}g P</span> | 
+                            <span class="c-color">${Math.round(mealC)}g H</span> | 
+                            <span class="f-color">${Math.round(mealF)}g R</span>
+                        </div>
+                    </div>
+                    <div class="food-suggestions">
+                        💡 <b>Mistä nämä saa?</b> Esimerkiksi n. ${meatEstimate}g broilerin rintafileetä / vähärasvaista nautaa / raejuustoa, ${carbEstimate}g (kuivapainona) riisiä / kauraa / pastaa ja ${fatEstimate}g oliiviöljyä / voita / pähkinöitä.
                     </div>
                 </div>
             `;
