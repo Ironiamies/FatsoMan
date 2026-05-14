@@ -118,6 +118,17 @@
 
         .science-box h3 { color: #86198f; margin-top: 0; font-size: 1.1rem; margin-bottom: 8px;}
         .science-box p { margin: 0; font-size: 0.95rem; line-height: 1.4; color: #701a75;}
+        
+        .delay-warning {
+            background: #ffe4e6;
+            border: 1px solid #fda4af;
+            color: #9f1239;
+            padding: 12px;
+            border-radius: 6px;
+            margin-top: 12px;
+            font-size: 0.95rem;
+            font-weight: 600;
+        }
 
         .macro-bars {
             display: grid;
@@ -221,7 +232,7 @@
         <div class="input-grid" style="grid-template-columns: 1fr; margin-top: 10px; border-top: 1px solid #e2e8f0; padding-top: 15px;">
             <div>
                 <label style="color: #8b5cf6;">🍷 Oletko ottamassa alkoholia tänään? (Annoksia)</label>
-                <input type="number" id="alcohol-doses" value="0" min="0" oninput="calculate()" placeholder="1 annos = 33cl olut tai 12cl viini">
+                <input type="number" id="alcohol-doses" value="0" min="0" oninput="calculate()" placeholder="Esim. 4 (1 annos = 33cl olut tai 12cl viini)">
                 <span style="font-size: 0.8rem; color: #64748b;">1 ravintola-annos = 12g puhdasta alkoholia (n. 100 kcal)</span>
             </div>
         </div>
@@ -238,7 +249,8 @@
 
         <div id="science-box" class="science-box">
             <h3>🛑 Rasvanpoltto pysähdyksissä: <span id="fat-block-time">0</span> tuntia!</h3>
-            <p><b>Tieteellinen fakta:</b> Keho ei voi varastoida alkoholia. Maksan on pakko priorisoida etanolin polttaminen yli kaiken muun. Rasvan hapettuminen (poltto) pysähtyy käytännössä täysin siksi aikaa, kun elimistö polttaa antamaasi <span id="alc-grams">0</span> grammaa alkoholia. Lisäksi alkoholin kalorit on vähennetty hiilihydraateistasi, jotta et liho.</p>
+            <p><b>Tieteellinen fakta:</b> Keho ei voi varastoida alkoholia. Maksan on pakko priorisoida etanolin polttaminen yli kaiken muun. Rasvan hapettuminen (poltto) pysähtyy käytännössä täysin siksi aikaa, kun elimistö polttaa antamaasi <span id="alc-grams">0</span> grammaa alkoholia. Alkoholin kalorit on alla vähennetty hiilihydraateistasi, jotta oppisit korvaamaan ne ruoasta – mutta jos syöt normaalisti juomisen lisäksi, tapahtuu seuraavaa:</p>
+            <div id="delay-text" class="delay-warning"></div>
         </div>
 
         <div class="macro-bars">
@@ -318,14 +330,12 @@
             document.getElementById('timeframe-box').style.display = 'none';
         }
 
-        // 3. Alkoholin tieteellinen vaikutus
+        // 3. Alkoholin tieteellinen vaikutus & Viivästys
         const ethanolGrams = alcoholDoses * 12; // 1 annos = 12g etanoli
         // Maksan käsittelykapasiteetti on karkeasti 0.1g per painokilo tunnissa.
         const eliminationRatePerHour = weight * 0.1; 
         const fatBurnPauseHours = ethanolGrams > 0 ? (ethanolGrams / eliminationRatePerHour).toFixed(1) : 0;
-        
-        // 1 annos viiniä/olutta on keskimäärin n. 100 kcal (84 kcal etanoli + 16 kcal hiilihydraatit juomasta)
-        const alcoholKcal = alcoholDoses * 100; 
+        const alcoholKcal = alcoholDoses * 100; // 1 annos viiniä/olutta on keskimäärin n. 100 kcal
 
         if (alcoholDoses > 0) {
             document.getElementById('science-box').style.display = 'block';
@@ -333,6 +343,16 @@
             document.getElementById('alc-grams').innerText = ethanolGrams;
             document.getElementById('alc-macro-box').style.display = 'block';
             document.getElementById('mac-a').innerText = ethanolGrams;
+            
+            // Tavoitteen karkaamisen laskenta
+            const delayBox = document.getElementById('delay-text');
+            if (goalDeficit < 0) {
+                const delayDays = (alcoholKcal / Math.abs(goalDeficit)).toFixed(1);
+                delayBox.innerHTML = `⚠️ TAVOITE KARKAA: Jos juot nämä annokset ohjelman päälle, tuhoat täsmälleen <b>${delayDays} päivän edestä</b> tekemääsi kalorivajetta. Tavoitteesi siirtyy siis ${delayDays} päivää kauemmaksi!`;
+            } else {
+                const fatGrams = Math.round((alcoholKcal / 7700) * 1000);
+                delayBox.innerHTML = `⚠️ LIHOTTAVA VAIKUTUS: Koska et ole miinuskaloreilla, nämä juomat varastoituvat (normaalin syömisen lisäksi) karkeasti <b>${fatGrams} grammaksi silkkaa rasvaa</b>.`;
+            }
         } else {
             document.getElementById('science-box').style.display = 'none';
             document.getElementById('alc-macro-box').style.display = 'none';
@@ -344,7 +364,6 @@
         const proteinCals = protein * 4;
         const fatCals = fat * 9;
         
-        // Hiilihydraatit joutuvat joustamaan alkoholin kaloreiden edestä
         let carbCals = targetCals - proteinCals - fatCals - alcoholKcal;
         let carbs = carbCals / 4;
         
