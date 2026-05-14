@@ -108,7 +108,7 @@
         .science-box {
             background: #fdf4ff;
             border: 1px solid #f0abfc;
-            padding: 15px;
+            padding: 20px;
             border-radius: 8px;
             margin-top: 15px;
             color: #86198f;
@@ -116,19 +116,21 @@
             display: none;
         }
 
-        .science-box h3 { color: #86198f; margin-top: 0; font-size: 1.1rem; margin-bottom: 8px;}
-        .science-box p { margin: 0; font-size: 0.95rem; line-height: 1.4; color: #701a75;}
+        .science-box h3 { color: #86198f; margin-top: 0; font-size: 1.2rem; margin-bottom: 12px; border-bottom: 1px solid #f0abfc; padding-bottom: 8px;}
+        .science-box p { margin: 0 0 10px 0; font-size: 0.95rem; line-height: 1.5; color: #701a75;}
         
-        .delay-warning {
-            background: #ffe4e6;
-            border: 1px solid #fda4af;
-            color: #9f1239;
-            padding: 12px;
-            border-radius: 6px;
-            margin-top: 12px;
-            font-size: 0.95rem;
-            font-weight: 600;
+        .weekly-impact {
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+            font-size: 1rem;
+            font-weight: bold;
+            line-height: 1.4;
         }
+        
+        .impact-ruin { background: #fee2e2; border: 2px solid #ef4444; color: #b91c1c; }
+        .impact-zero { background: #fef9c3; border: 2px solid #eab308; color: #a16207; }
+        .impact-survive { background: #ffedd5; border: 2px solid #f97316; color: #c2410c; }
 
         .macro-bars {
             display: grid;
@@ -165,278 +167,4 @@
         }
 
         .meal-title { font-weight: bold; font-size: 1.2rem; color: var(--accent); }
-        .meal-macros { font-weight: bold; font-size: 1.1rem; }
-        .snack-card { border-color: var(--primary); background: #eff6ff; }
-        .snack-card .meal-header { border-bottom-color: #bfdbfe; }
-        
-        .food-suggestions { font-size: 0.9rem; color: var(--text-muted); line-height: 1.5; }
-        .food-suggestions b { color: var(--text-main); }
-
-        .warning {
-            background: #fef2f2;
-            color: #ef4444;
-            padding: 10px;
-            border-radius: 8px;
-            margin-top: 10px;
-            font-size: 0.9rem;
-            display: none;
-        }
-
-    </style>
-</head>
-<body>
-
-<div class="container">
-    
-    <div class="card">
-        <h2>📊 Perustiedot & Tavoite</h2>
-        <div class="input-grid">
-            <div>
-                <label>Sukupuoli</label>
-                <select id="gender" onchange="calculate()">
-                    <option value="male">Mies</option>
-                    <option value="female">Nainen</option>
-                </select>
-            </div>
-            <div><label>Ikä (v)</label><input type="number" id="age" value="35" oninput="calculate()"></div>
-            <div><label>Paino (kg)</label><input type="number" id="weight" value="95" oninput="calculate()"></div>
-            <div><label>Pituus (cm)</label><input type="number" id="height" value="180" oninput="calculate()"></div>
-        </div>
-
-        <div class="input-grid">
-            <div>
-                <label>Arkiaktiivisuus</label>
-                <select id="activity" onchange="calculate()">
-                    <option value="1.2">Istumatyö, ei liikuntaa</option>
-                    <option value="1.375" selected>Kevyt aktiivisuus / seisomatyö</option>
-                    <option value="1.55">Kohtalainen aktiivisuus</option>
-                    <option value="1.725">Raskas fyysinen työ</option>
-                </select>
-            </div>
-            <div>
-                <label>Vauhti</label>
-                <select id="goal" onchange="calculate()">
-                    <option value="0">Ylläpito (±0 kcal)</option>
-                    <option value="-250">Kevyt kiristys (-0.25 kg/vko)</option>
-                    <option value="-500" selected>Normaali dieetti (-0.5 kg/vko)</option>
-                    <option value="-750">Nopea dieetti (-0.75 kg/vko)</option>
-                    <option value="-1000">Aggressiivinen dieetti (-1.0 kg/vko)</option>
-                </select>
-            </div>
-            <div>
-                <label>Pudotustarve (kg)</label>
-                <input type="number" id="target-loss" value="10" oninput="calculate()">
-            </div>
-        </div>
-        
-        <div class="input-grid" style="grid-template-columns: 1fr; margin-top: 10px; border-top: 1px solid #e2e8f0; padding-top: 15px;">
-            <div>
-                <label style="color: #8b5cf6;">🍷 Oletko ottamassa alkoholia tänään? (Annoksia)</label>
-                <input type="number" id="alcohol-doses" value="0" min="0" oninput="calculate()" placeholder="Esim. 4 (1 annos = 33cl olut tai 12cl viini)">
-                <span style="font-size: 0.8rem; color: #64748b;">1 ravintola-annos = 12g puhdasta alkoholia (n. 100 kcal)</span>
-            </div>
-        </div>
-    </div>
-
-    <div class="card result-main">
-        <p>Päivittäinen kaloritavoitteesi</p>
-        <h1><span id="target-cals">0</span> kcal</h1>
-        <p>Perusaineenvaihdunta (BMR): <span id="bmr-val">0</span> kcal | Kulutus: <span id="tdee-val">0</span> kcal</p>
-        
-        <div id="timeframe-box" class="timeframe-box">
-            ⏳ Aika-arvio tavoitteeseen: <span id="timeframe-val">-</span>
-        </div>
-
-        <div id="science-box" class="science-box">
-            <h3>🛑 Rasvanpoltto pysähdyksissä: <span id="fat-block-time">0</span> tuntia!</h3>
-            <p><b>Tieteellinen fakta:</b> Keho ei voi varastoida alkoholia. Maksan on pakko priorisoida etanolin polttaminen yli kaiken muun. Rasvan hapettuminen (poltto) pysähtyy käytännössä täysin siksi aikaa, kun elimistö polttaa antamaasi <span id="alc-grams">0</span> grammaa alkoholia. Alkoholin kalorit on alla vähennetty hiilihydraateistasi, jotta oppisit korvaamaan ne ruoasta – mutta jos syöt normaalisti juomisen lisäksi, tapahtuu seuraavaa:</p>
-            <div id="delay-text" class="delay-warning"></div>
-        </div>
-
-        <div class="macro-bars">
-            <div class="macro-box">
-                <div style="font-size:0.8rem; color:#64748b;">Proteiini</div>
-                <div class="m-val p-color"><span id="mac-p">0</span> g</div>
-            </div>
-            <div class="macro-box">
-                <div style="font-size:0.8rem; color:#64748b;">Hiilihydraatit</div>
-                <div class="m-val c-color"><span id="mac-c">0</span> g</div>
-            </div>
-            <div class="macro-box">
-                <div style="font-size:0.8rem; color:#64748b;">Rasva</div>
-                <div class="m-val f-color"><span id="mac-f">0</span> g</div>
-            </div>
-            <div class="macro-box" id="alc-macro-box" style="display:none; border-color: #c084fc; background: #faf5ff;">
-                <div style="font-size:0.8rem; color:#8b5cf6;">Alkoholi</div>
-                <div class="m-val a-color"><span id="mac-a">0</span> g</div>
-            </div>
-        </div>
-        <div id="carb-warning" class="warning">⚠️ Huom! Kaloritavoite on niin alhainen (tai joit niin paljon), että hiilihydraatit menivät nollaan. Nosta kaloreita tai pudota rasvaa.</div>
-    </div>
-
-    <div class="card">
-        <h2>🍽️ Ruokavaliomalli</h2>
-        <div class="input-grid" style="grid-template-columns: 1fr 1fr;">
-            <div>
-                <label>Aterioiden määrä</label>
-                <select id="meals" onchange="calculate()">
-                    <option value="3">3 ateriaa päivässä</option>
-                    <option value="4" selected>4 ateriaa päivässä</option>
-                    <option value="5">5 ateriaa päivässä</option>
-                </select>
-            </div>
-            <div class="toggle-row">
-                <input type="checkbox" id="training-day" onchange="calculate()" checked>
-                <label style="margin:0; color:#1e293b; cursor:pointer;" for="training-day">💪 Treenipäivä</label>
-            </div>
-        </div>
-
-        <div id="meal-plan-container" class="meal-plan">
-            </div>
-    </div>
-
-</div>
-
-<script>
-    function calculate() {
-        const gender = document.getElementById('gender').value;
-        const weight = parseFloat(document.getElementById('weight').value) || 0;
-        const height = parseFloat(document.getElementById('height').value) || 0;
-        const age = parseFloat(document.getElementById('age').value) || 0;
-        const activity = parseFloat(document.getElementById('activity').value);
-        const goalDeficit = parseFloat(document.getElementById('goal').value);
-        const targetLoss = parseFloat(document.getElementById('target-loss').value) || 0;
-        const mealCount = parseInt(document.getElementById('meals').value);
-        const isTrainingDay = document.getElementById('training-day').checked;
-        const alcoholDoses = parseFloat(document.getElementById('alcohol-doses').value) || 0;
-
-        if (!weight || !height || !age) return;
-
-        // 1. Harris-Benedict BMR & TDEE
-        let bmr = gender === 'male' 
-            ? 66.5 + (13.75 * weight) + (5.003 * height) - (6.75 * age) 
-            : 655.1 + (9.563 * weight) + (1.850 * height) - (4.676 * age);
-        
-        const tdee = bmr * activity;
-        const targetCals = tdee + goalDeficit;
-
-        // 2. Aika-arvio
-        const timeframeEl = document.getElementById('timeframe-val');
-        if (goalDeficit < 0 && targetLoss > 0) {
-            const weeksNeeded = Math.round((targetLoss * 7700) / Math.abs(goalDeficit) / 7);
-            timeframeEl.innerText = `${weeksNeeded} viikkoa (n. ${(weeksNeeded / 4.33).toFixed(1)} kk)`;
-            document.getElementById('timeframe-box').style.display = 'block';
-        } else {
-            document.getElementById('timeframe-box').style.display = 'none';
-        }
-
-        // 3. Alkoholin tieteellinen vaikutus & Viivästys
-        const ethanolGrams = alcoholDoses * 12; // 1 annos = 12g etanoli
-        // Maksan käsittelykapasiteetti on karkeasti 0.1g per painokilo tunnissa.
-        const eliminationRatePerHour = weight * 0.1; 
-        const fatBurnPauseHours = ethanolGrams > 0 ? (ethanolGrams / eliminationRatePerHour).toFixed(1) : 0;
-        const alcoholKcal = alcoholDoses * 100; // 1 annos viiniä/olutta on keskimäärin n. 100 kcal
-
-        if (alcoholDoses > 0) {
-            document.getElementById('science-box').style.display = 'block';
-            document.getElementById('fat-block-time').innerText = fatBurnPauseHours;
-            document.getElementById('alc-grams').innerText = ethanolGrams;
-            document.getElementById('alc-macro-box').style.display = 'block';
-            document.getElementById('mac-a').innerText = ethanolGrams;
-            
-            // Tavoitteen karkaamisen laskenta
-            const delayBox = document.getElementById('delay-text');
-            if (goalDeficit < 0) {
-                const delayDays = (alcoholKcal / Math.abs(goalDeficit)).toFixed(1);
-                delayBox.innerHTML = `⚠️ TAVOITE KARKAA: Jos juot nämä annokset ohjelman päälle, tuhoat täsmälleen <b>${delayDays} päivän edestä</b> tekemääsi kalorivajetta. Tavoitteesi siirtyy siis ${delayDays} päivää kauemmaksi!`;
-            } else {
-                const fatGrams = Math.round((alcoholKcal / 7700) * 1000);
-                delayBox.innerHTML = `⚠️ LIHOTTAVA VAIKUTUS: Koska et ole miinuskaloreilla, nämä juomat varastoituvat (normaalin syömisen lisäksi) karkeasti <b>${fatGrams} grammaksi silkkaa rasvaa</b>.`;
-            }
-        } else {
-            document.getElementById('science-box').style.display = 'none';
-            document.getElementById('alc-macro-box').style.display = 'none';
-        }
-
-        // 4. Makrojen jako (Proteiini 2g/kg, Rasva 1g/kg, Hiilarit loput - alkoholi)
-        const protein = weight * 2;
-        const fat = weight * 1;
-        const proteinCals = protein * 4;
-        const fatCals = fat * 9;
-        
-        let carbCals = targetCals - proteinCals - fatCals - alcoholKcal;
-        let carbs = carbCals / 4;
-        
-        const warnEl = document.getElementById('carb-warning');
-        if (carbs < 0) {
-            carbs = 0;
-            warnEl.style.display = "block";
-        } else {
-            warnEl.style.display = "none";
-        }
-
-        // Päivitä UI
-        document.getElementById('bmr-val').innerText = Math.round(bmr);
-        document.getElementById('tdee-val').innerText = Math.round(tdee);
-        document.getElementById('target-cals').innerText = Math.round(targetCals);
-        document.getElementById('mac-p').innerText = Math.round(protein);
-        document.getElementById('mac-f').innerText = Math.round(fat);
-        document.getElementById('mac-c').innerText = Math.round(carbs);
-
-        // 5. Ateriasuunnitelman luonti
-        const planContainer = document.getElementById('meal-plan-container');
-        planContainer.innerHTML = "";
-
-        let remainingP = protein;
-        let remainingC = carbs;
-        let remainingF = fat;
-
-        if (isTrainingDay) {
-            const snackP = Math.min(30, remainingP * 0.25);
-            const snackC = Math.min(40, remainingC * 0.30);
-            
-            remainingP -= snackP;
-            remainingC -= snackC;
-            
-            planContainer.innerHTML += `
-                <div class="meal-card snack-card">
-                    <div class="meal-header">
-                        <div class="meal-title">⚡ Treenilaturi / Palkkari <span style="font-size:0.9rem; font-weight:normal; color:#64748b;">(~${Math.round((snackP*4)+(snackC*4))} kcal)</span></div>
-                        <div class="meal-macros"><span class="p-color">${Math.round(snackP)}g P</span> | <span class="c-color">${Math.round(snackC)}g H</span> | <span class="f-color">0g R</span></div>
-                    </div>
-                    <div class="food-suggestions">💡 <b>Nopeaa imeytymistä:</b> Hera-annos (n. 1 dl) ja 1 banaani tai puoli kourallista maltodekstriiniä.</div>
-                </div>
-            `;
-        }
-
-        const mealP = remainingP / mealCount;
-        const mealC = remainingC / mealCount;
-        const mealF = remainingF / mealCount;
-        const mealKcal = Math.round((mealP*4) + (mealC*4) + (mealF*9));
-
-        const mealNames = mealCount === 3 ? ["🍳 Aamiainen", "🥗 Lounas", "🥩 Päivällinen"] 
-                        : mealCount === 5 ? ["🍳 Aamiainen", "🥗 Lounas", "🥪 Välipala", "🥩 Päivällinen", "🥣 Iltapala"] 
-                        : ["🍳 Aamiainen", "🥗 Lounas", "🥩 Päivällinen", "🥣 Iltapala"];
-
-        for (let i = 0; i < mealCount; i++) {
-            let meatEstimate = Math.round(mealP * 4.5);
-            let carbEstimate = Math.round(mealC * 1.5);
-            let fatEstimate = Math.round(mealF);
-
-            planContainer.innerHTML += `
-                <div class="meal-card">
-                    <div class="meal-header">
-                        <div class="meal-title">${mealNames[i]} <span style="font-size:0.9rem; font-weight:normal; color:#64748b;">(~${mealKcal} kcal)</span></div>
-                        <div class="meal-macros"><span class="p-color">${Math.round(mealP)}g P</span> | <span class="c-color">${Math.round(mealC)}g H</span> | <span class="f-color">${Math.round(mealF)}g R</span></div>
-                    </div>
-                    <div class="food-suggestions">💡 <b>Mistä nämä saa?</b> N. ${meatEstimate}g kanaa/nautaa/raejuustoa, ${carbEstimate}g (kuivana) riisiä/pastaa/kauraa ja ${fatEstimate}g öljyä/pähkinöitä.</div>
-                </div>
-            `;
-        }
-    }
-
-    window.onload = calculate;
-</script>
-
-</body>
-</html>
+        .meal-macros { font-weight: bold; font
